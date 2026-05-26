@@ -19,6 +19,8 @@ urlpatterns = [
     path("events/<int:pk>/media/<int:media_id>/delete/", views.event_media_delete, name="event_media_delete"),
     path("events/<int:pk>/qr.png", views.event_qr, name="event_qr"),
     path("events/<int:pk>/certificate/<str:usn>/", views.certificate_pdf, name="certificate"),
+    path("events/<int:pk>/export/attendance/", views.export_attendance, name="export_attendance"),
+    path("events/<int:pk>/export/registrations/", views.export_registrations, name="export_registrations"),
     path("predictor/", views.predictor_view, name="predictor"),
     path("scan/<int:event_id>/", views.scan_public, name="scan_public"),
 ]

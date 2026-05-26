@@ -5,6 +5,8 @@ from typing import Any
 
 import json
 import qrcode
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
 from django.db.models import Avg, Count
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -354,6 +356,100 @@ def predictor_view(request: HttpRequest) -> HttpResponse:
         request,
         "events/predictor.html",
         {"form": form, "prediction": prediction, "has_model": model is not None},
+    )
+
+
+def _create_excel_buffer(data: list[dict], filename: str) -> io.BytesIO:
+    """Helper to create Excel workbook with student data."""
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Data"
+    
+    # Headers
+    headers = ["Student USN", "Student Name", "Semester"]
+    ws.append(headers)
+    
+    # Style header row
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF")
+    for cell in ws[1]:
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    
+    # Add data
+    for row_data in data:
+        ws.append([row_data["usn"], row_data["name"], row_data["semester"]])
+    
+    # Auto-adjust column widths
+    ws.column_dimensions["A"].width = 15
+    ws.column_dimensions["B"].width = 30
+    ws.column_dimensions["C"].width = 12
+    
+    # Save to buffer
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    return buffer
+
+
+@login_required
+@role_required(FACULTY, COORD)
+def export_attendance(request: HttpRequest, pk: int) -> HttpResponse:
+    """Export attendance records to Excel."""
+    event = get_object_or_404(Event, pk=pk)
+    
+    # Check access: creator or admin can export
+    if request.user.role == COORD and event.created_by_id != request.user.id:
+        raise Http404()
+    if request.user.role == FACULTY and event.created_by_id != request.user.id:
+        raise Http404()
+    
+    # Get attendance data
+    attendance_data = []
+    for att in event.attendance_rows.select_related("student"):
+        attendance_data.append({
+            "usn": att.student.usn,
+            "name": att.student.name,
+            "semester": att.student.semester,
+        })
+    
+    buffer = _create_excel_buffer(attendance_data, f"attendance-{event.pk}.xlsx")
+    return FileResponse(
+        buffer,
+        as_attachment=True,
+        filename=f"Attendance_{event.title.replace(' ', '_')}_{event.pk}.xlsx",
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+@login_required
+@role_required(FACULTY, COORD)
+def export_registrations(request: HttpRequest, pk: int) -> HttpResponse:
+    """Export registration records to Excel."""
+    event = get_object_or_404(Event, pk=pk)
+    
+    # Check access: creator or admin can export
+    if request.user.role == COORD and event.created_by_id != request.user.id:
+        raise Http404()
+    if request.user.role == FACULTY and event.created_by_id != request.user.id:
+        raise Http404()
+    
+    # Get registration data
+    registration_data = []
+    for reg in event.registration_rows.select_related("student"):
+        registration_data.append({
+            "usn": reg.student.usn,
+            "name": reg.student.name,
+            "semester": reg.student.semester,
+        })
+    
+    buffer = _create_excel_buffer(registration_data, f"registrations-{event.pk}.xlsx")
+    return FileResponse(
+        buffer,
+        as_attachment=True,
+        filename=f"Registrations_{event.title.replace(' ', '_')}_{event.pk}.xlsx",
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
 

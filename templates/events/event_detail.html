@@ -118,28 +118,42 @@
 <section class="mt-6 grid gap-6 lg:grid-cols-2">
   <div class="panel rounded-2xl p-6">
     <h2 class="text-lg font-black">Registered students</h2>
-    <div class="mt-4 max-h-80 overflow-auto rounded-xl border border-slate-200 dark:border-slate-700">
-      {% for row in event.registration_rows.all %}
-        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 text-sm last:border-0 dark:border-slate-800">
-          <span class="font-semibold">{{ row.student.usn }}</span><span class="text-slate-500">{{ row.student.name }}</span>
-        </div>
-      {% empty %}
-        <div class="px-4 py-6 text-sm text-slate-500">No registrations yet.</div>
-      {% endfor %}
+    <div class="mt-4 flex items-center justify-between gap-3">
+      <div class="max-h-80 w-full overflow-auto rounded-xl border border-slate-200 dark:border-slate-700">
+        {% for row in event.registration_rows.all %}
+          <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 text-sm last:border-0 dark:border-slate-800">
+            <span class="font-semibold">{{ row.student.usn }}</span><span class="text-slate-500">{{ row.student.name }}</span>
+          </div>
+        {% empty %}
+          <div class="px-4 py-6 text-sm text-slate-500">No registrations yet.</div>
+        {% endfor %}
+      </div>
     </div>
+    {% if user.role in 'FACULTY|STUDENT_COORDINATOR' and event.registration_rows.exists %}
+      <a href="{% url 'events:export_registrations' event.pk %}" class="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-300 dark:hover:bg-blue-950/50">
+        <i data-lucide="download" class="h-4 w-4"></i>Export to Excel
+      </a>
+    {% endif %}
   </div>
 
   <div class="panel rounded-2xl p-6">
     <h2 class="text-lg font-black">Attendance records</h2>
-    <div class="mt-4 max-h-80 overflow-auto rounded-xl border border-slate-200 dark:border-slate-700">
-      {% for row in event.attendance_rows.all %}
-        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 text-sm last:border-0 dark:border-slate-800">
-          <span class="font-semibold">{{ row.student.usn }}</span><span class="text-slate-500">{{ row.student.name }}</span>
-        </div>
-      {% empty %}
-        <div class="px-4 py-6 text-sm text-slate-500">No attendance has been recorded yet.</div>
-      {% endfor %}
+    <div class="mt-4 flex items-center justify-between gap-3">
+      <div class="max-h-80 w-full overflow-auto rounded-xl border border-slate-200 dark:border-slate-700">
+        {% for row in event.attendance_rows.all %}
+          <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 text-sm last:border-0 dark:border-slate-800">
+            <span class="font-semibold">{{ row.student.usn }}</span><span class="text-slate-500">{{ row.student.name }}</span>
+          </div>
+        {% empty %}
+          <div class="px-4 py-6 text-sm text-slate-500">No attendance has been recorded yet.</div>
+        {% endfor %}
+      </div>
     </div>
+    {% if user.role in 'FACULTY|STUDENT_COORDINATOR' and event.attendance_rows.exists %}
+      <a href="{% url 'events:export_attendance' event.pk %}" class="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-300 dark:hover:bg-emerald-950/50">
+        <i data-lucide="download" class="h-4 w-4"></i>Export to Excel
+      </a>
+    {% endif %}
   </div>
 </section>
 {% endblock %}
