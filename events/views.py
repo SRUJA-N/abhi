@@ -309,11 +309,16 @@ def scan_public(request: HttpRequest, event_id: int) -> HttpResponse:
                 messages.error(request, "USN not found in CSE-ICB student registry.")
             else:
                 student = Student.objects.get(pk=student_id)
-                att, created = Attendance.objects.get_or_create(event=event, student=student)
-                if created:
-                    messages.success(request, f"Attendance recorded for {student.usn}.")
+                # Check if student is registered for this event
+                is_registered = EventRegistration.objects.filter(event=event, student=student).exists()
+                if not is_registered:
+                    messages.error(request, "You must be registered for this event to mark attendance.")
                 else:
-                    messages.info(request, "Attendance already registered for this USN.")
+                    att, created = Attendance.objects.get_or_create(event=event, student=student)
+                    if created:
+                        messages.success(request, f"Attendance recorded for {student.usn}.")
+                    else:
+                        messages.info(request, "Attendance already registered for this USN.")
             return redirect(f"{reverse('events:scan_public', args=[event.pk])}?t={event.attendance_token}")
     else:
         form = ScanForm()
