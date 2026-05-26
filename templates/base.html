@@ -90,8 +90,6 @@
         {% if user.is_authenticated %}
           {% if user.role == 'ADMIN' %}
             <a class="nav-item" href="{% url 'events_admin_approvals' %}"><i data-lucide="shield-check" class="h-4 w-4"></i><span>Approvals</span></a>
-            <a class="nav-item" href="{% url 'events:predictor' %}"><i data-lucide="chart-no-axes-combined" class="h-4 w-4"></i><span>Budget AI</span></a>
-            <a class="nav-item" href="/admin/"><i data-lucide="users-round" class="h-4 w-4"></i><span>Users & Roles</span></a>
           {% elif user.role == 'FACULTY' %}
             <a class="nav-item" href="{% url 'events_admin_approvals' %}"><i data-lucide="clipboard-check" class="h-4 w-4"></i><span>Review Queue</span></a>
             <a class="nav-item" href="{% url 'events:event_create' %}"><i data-lucide="file-plus-2" class="h-4 w-4"></i><span>Create Event</span></a>
