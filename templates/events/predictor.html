@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Budget Predictor - CSE-ICB{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <div class="text-sm font-bold uppercase tracking-[0.2em]" style="color:var(--accent)">Budget intelligence</div>
+    <h1 class="mt-2 text-3xl font-black tracking-tight md:text-4xl">ML budget predictor</h1>
+    <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">Estimate future event cost from historical approved events using the local regression model.</p>
+  </div>
+</div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-2">
+  <div class="panel rounded-2xl p-6">
+    <h2 class="text-lg font-black">Scenario inputs</h2>
+    <form method="post" class="mt-5 space-y-4">
+      {% csrf_token %}
+      {% for field in form %}
+        <div>
+          <label class="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<div class="mt-1 text-xs font-bold text-rose-600">{{ field.errors|striptags }}</div>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="btn-primary inline-flex items-center gap-2" type="submit"><i data-lucide="sparkles" class="h-4 w-4"></i>Predict</button>
+    </form>
+  </div>
+  <div class="panel rounded-2xl p-6">
+    <h2 class="text-lg font-black">Prediction output</h2>
+    {% if prediction %}
+      <div class="mt-5 rounded-2xl p-5" style="background:var(--accent-soft)">
+        <div class="text-sm font-bold" style="color:var(--accent-strong)">Predicted total need</div>
+        <div class="mt-2 text-4xl font-black">INR {{ prediction.cost }}</div>
+      </div>
+      <div class="mt-5 grid gap-3 text-sm">
+        <div class="flex justify-between border-b border-slate-100 pb-3 dark:border-slate-800"><span>Intercept</span><b>{{ prediction.beta0 }}</b></div>
+        <div class="flex justify-between border-b border-slate-100 pb-3 dark:border-slate-800"><span>Participants coefficient</span><b>{{ prediction.beta1 }}</b></div>
+        <div class="flex justify-between border-b border-slate-100 pb-3 dark:border-slate-800"><span>Type coefficient</span><b>{{ prediction.beta2 }}</b></div>
+      </div>
+    {% else %}
+      <div class="mt-5 rounded-2xl border border-dashed border-slate-300 p-8 text-sm text-slate-500 dark:border-slate-700">Submit the form to generate a local prediction.</div>
+    {% endif %}
+    <p class="mt-5 text-xs font-semibold text-slate-500">Training status: {% if has_model %}<span class="text-emerald-600">model loaded from historical rows</span>{% else %}<span class="text-amber-600">fallback coefficients until enough approved events exist</span>{% endif %}</p>
+  </div>
+</div>
+{% endblock %}

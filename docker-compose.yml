@@ -1,0 +1,44 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: bit_events
+      MYSQL_USER: bit_user
+      MYSQL_PASSWORD: bit_pass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 25s
+
+  web:
+    build: .
+    restart: unless-stopped
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      MYSQL_DATABASE: bit_events
+      MYSQL_USER: bit_user
+      MYSQL_PASSWORD: bit_pass
+      MYSQL_HOST: db
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,web,0.0.0.0,testserver,albatross-ambiguity-removed.ngrok-free.dev"
+
+      DJANGO_DEBUG: "1"
+      DJANGO_CSRF_TRUSTED_ORIGINS: "https://albatross-ambiguity-removed.ngrok-free.dev"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

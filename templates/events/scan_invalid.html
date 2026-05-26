@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Invalid scan{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-xl">
+  <div class="panel rounded-2xl border-rose-200 p-8 text-center dark:border-rose-900">
+    <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"><i data-lucide="shield-alert" class="h-7 w-7"></i></div>
+    <h1 class="mt-5 text-3xl font-black">Invite invalid or expired</h1>
+    <p class="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">Only approved events expose QR attendance. Scan the latest QR code and make sure the signed token parameter is included.</p>
+  </div>
+</div>
+{% endblock %}

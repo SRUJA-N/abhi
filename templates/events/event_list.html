@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Events - CSE-ICB{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <div class="text-sm font-bold uppercase tracking-[0.2em]" style="color:var(--accent)">Event catalog</div>
+    <h1 class="mt-2 text-3xl font-black tracking-tight md:text-4xl">{% if user.role == 'VIEWER' %}Browse public events{% else %}Manage events{% endif %}</h1>
+    <p class="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+      {% if user.role == 'VIEWER' %}Explore approved events, open galleries, and register using your student USN.{% else %}Track registrations, attendance readiness, media, and event operations from one responsive view.{% endif %}
+    </p>
+  </div>
+  {% if user.role == 'ADMIN' or user.role == 'FACULTY' or user.role == 'STUDENT_COORDINATOR' %}
+    <a href="{% url 'events:event_create' %}" class="btn-primary inline-flex items-center gap-2"><i data-lucide="plus" class="h-4 w-4"></i>New event</a>
+  {% endif %}
+</div>
+
+<div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+  {% for e in events %}
+    <article class="panel lift overflow-hidden rounded-2xl transition">
+      <a href="{% url 'events:event_detail' e.pk %}" class="block">
+        <div class="relative h-36 bg-slate-100 dark:bg-slate-800" style="background:linear-gradient(135deg,var(--accent-soft),rgba(15,23,42,.16)), url('https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=900&q=72'); background-size:cover; background-position:center;"></div>
+        <div class="p-5">
+          <h2 class="text-lg font-black leading-snug">{{ e.title }}</h2>
+          <div class="mt-3 grid gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <div class="flex items-center gap-2"><i data-lucide="calendar" class="h-4 w-4"></i>{{ e.event_date }}</div>
+            <div class="flex items-center gap-2"><i data-lucide="map-pin" class="h-4 w-4"></i>{{ e.venue }}</div>
+            <div class="flex items-center gap-2"><i data-lucide="tag" class="h-4 w-4"></i>{{ e.get_event_type_display }}</div>
+          </div>
+        </div>
+      </a>
+      <div class="flex gap-2 border-t border-slate-200 p-4 dark:border-slate-800">
+        <a href="{% url 'events:event_detail' e.pk %}" class="btn-soft flex-1 text-center text-sm">Open</a>
+        <a href="{% url 'events:event_media_list' e.pk %}" class="rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Media</a>
+      </div>
+    </article>
+  {% empty %}
+    <div class="panel rounded-2xl p-10 text-center text-slate-500 md:col-span-2 xl:col-span-3">
+      No events available for this role yet.
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

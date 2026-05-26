@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Scan - {{ event.title }}{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-xl">
+  <div class="panel rounded-2xl p-8">
+    <div class="grid h-14 w-14 place-items-center rounded-2xl text-white" style="background:var(--accent)"><i data-lucide="qr-code" class="h-7 w-7"></i></div>
+    <h1 class="mt-5 text-3xl font-black">Attendance registration</h1>
+    <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ event.title }} | {{ event.event_date }}</p>
+    <p class="mt-4 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-500 dark:bg-slate-900 dark:text-slate-400">Student USN is validated before attendance is saved. Duplicate scans for the same student are safely ignored.</p>
+    <form method="post" class="mt-6 space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="t" value="{{ token }}" />
+      {% for field in form %}
+        <div>
+          <label class="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<div class="mt-1 text-xs font-bold text-rose-600">{{ field.errors|striptags }}</div>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="btn-primary w-full" type="submit">Register attendance</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

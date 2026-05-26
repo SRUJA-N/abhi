@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - CSE-ICB{% endblock %}
+{% block content %}
+<section class="overflow-hidden rounded-2xl p-6 text-white shadow-soft md:p-8" style="background:linear-gradient(135deg,var(--accent),var(--accent-strong));">
+  <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+    <div class="max-w-2xl">
+      <div class="text-sm font-bold uppercase tracking-[0.22em] text-white/75">
+        {% if user.role == 'ADMIN' %}Administrative command center
+        {% elif user.role == 'FACULTY' %}Faculty coordinator desk
+        {% elif user.role == 'STUDENT_COORDINATOR' %}Student coordinator studio
+        {% else %}Event discovery hub{% endif %}
+      </div>
+      <h1 class="mt-3 text-3xl font-black tracking-tight md:text-5xl">
+        {% if user.role == 'ADMIN' %}Approve, fund, and monitor every event.
+        {% elif user.role == 'FACULTY' %}Keep academic events moving with clarity.
+        {% elif user.role == 'STUDENT_COORDINATOR' %}Create events and track execution fast.
+        {% else %}Browse approved events and your participation status.{% endif %}
+      </h1>
+      <p class="mt-4 max-w-3xl text-sm leading-6 text-white/80 md:text-base">
+        {% if user.role == 'ADMIN' %}A professional overview of budgets, sponsorship health, and institutional participation.
+        {% elif user.role == 'FACULTY' %}Review submissions, watch participation, and keep media/document records organized for department events.
+        {% elif user.role == 'STUDENT_COORDINATOR' %}A focused workspace for event drafts, registration tracking, and attendance QR handling.
+        {% else %}A minimal read-only experience for finding events, registering seats, viewing galleries, and sending feedback after completion.{% endif %}
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      {% if user.role == 'ADMIN' or user.role == 'FACULTY' or user.role == 'STUDENT_COORDINATOR' %}
+        <a href="{% url 'events:event_create' %}" class="rounded-xl bg-white/15 px-4 py-3 text-sm font-black text-white ring-1 ring-white/30 hover:bg-white/25">Create event</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% if user.role == 'ADMIN' %}
+<section class="mt-6 grid gap-4 sm:grid-cols-2">
+  <div class="panel lift rounded-2xl p-5 transition"><div class="text-sm font-bold text-slate-500 dark:text-slate-400">Total events</div><div class="mt-2 text-3xl font-black">{{ event_counts.total }}</div><div class="mt-2 text-xs text-slate-500">Across all statuses</div></div>
+  <div class="panel lift rounded-2xl p-5 transition"><div class="text-sm font-bold text-slate-500 dark:text-slate-400">Sponsorship</div><div class="mt-2 text-3xl font-black">INR {{ totals.sponsor|floatformat:0 }}</div><div class="mt-2 text-xs text-slate-500">Approved event funding</div></div>
+</section>
+
+<section class="mt-6 grid gap-6">
+  <div class="panel rounded-2xl p-6">
+    <div class="flex items-center justify-between gap-3">
+      <h2 class="text-lg font-black">Budget and sponsorship analytics</h2>
+    </div>
+    <canvas id="budgetChart" height="118" class="mt-5"></canvas>
+  </div>
+</section>
+{% elif user.role == 'FACULTY' %}
+<section class="mt-6 grid gap-4 md:grid-cols-2">
+  <div class="panel rounded-2xl p-5"><div class="text-sm font-bold text-slate-500">Registrations</div><div class="mt-2 text-3xl font-black">{{ registration_totals }}</div></div>
+  <div class="panel rounded-2xl p-5"><div class="text-sm font-bold text-slate-500">Media files</div><div class="mt-2 text-3xl font-black">{{ media_totals }}</div></div>
+</section>
+<section class="mt-6 grid gap-6 lg:grid-cols-3">
+  <div class="panel rounded-2xl p-6 lg:col-span-2">
+    <h2 class="text-lg font-black">Academic monitoring</h2>
+    <canvas id="budgetChart" height="120" class="mt-5"></canvas>
+  </div>
+  <div class="panel rounded-2xl p-6">
+    <h2 class="text-lg font-black">Coordinator actions</h2>
+    <div class="mt-5 grid gap-3">
+      <a class="btn-soft text-center" href="{% url 'events_admin_approvals' %}">Review submissions</a>
+      <a class="btn-soft text-center" href="{% url 'events:event_create' %}">Create academic event</a>
+      <a class="btn-soft text-center" href="{% url 'events:event_list' %}">Manage documents</a>
+    </div>
+  </div>
+</section>
+{% elif user.role == 'STUDENT_COORDINATOR' %}
+<section class="mt-6 grid gap-4 md:grid-cols-4">
+  <div class="panel rounded-2xl p-5"><div class="text-sm font-bold text-slate-500">My events</div><div class="mt-2 text-3xl font-black">{{ event_counts.mine }}</div></div>
+  <div class="panel rounded-2xl p-5"><div class="text-sm font-bold text-slate-500">My pending</div><div class="mt-2 text-3xl font-black text-amber-600">{{ event_counts.my_pending }}</div></div>
+  <div class="panel rounded-2xl p-5"><div class="text-sm font-bold text-slate-500">Registrations</div><div class="mt-2 text-3xl font-black">{{ registration_totals }}</div></div>
+  <div class="panel rounded-2xl p-5"><div class="text-sm font-bold text-slate-500">Attendance</div><div class="mt-2 text-3xl font-black">{{ attendance_totals }}</div></div>
+</section>
+<section class="mt-6 grid gap-6">
+  <div class="panel rounded-2xl p-6">
+    <h2 class="text-lg font-black">Productivity board</h2>
+    <div class="mt-5 grid gap-4 sm:grid-cols-2">
+      <a class="rounded-xl border border-slate-200 p-5 transition hover:border-orange-300 hover:bg-orange-50 dark:border-slate-700 dark:hover:bg-orange-950/20" href="{% url 'events:event_create' %}"><b>Create</b><p class="mt-2 text-sm text-slate-500">Submit a new event for approval.</p></a>
+      <a class="rounded-xl border border-slate-200 p-5 transition hover:border-orange-300 hover:bg-orange-50 dark:border-slate-700 dark:hover:bg-orange-950/20" href="{% url 'events:event_list' %}"><b>Track</b><p class="mt-2 text-sm text-slate-500">Monitor registrations.</p></a>
+    </div>
+  </div>
+</section>
+{% else %}
+<section class="mt-6 grid gap-4 md:grid-cols-3">
+  <div class="panel rounded-2xl p-5"><div class="text-sm font-bold text-slate-500">Approved events</div><div class="mt-2 text-3xl font-black">{{ event_counts.approved }}</div></div>
+  <div class="panel rounded-2xl p-5"><div class="text-sm font-bold text-slate-500">Registrations</div><div class="mt-2 text-3xl font-black">{{ registration_totals }}</div></div>
+  <div class="panel rounded-2xl p-5"><div class="text-sm font-bold text-slate-500">Avg feedback</div><div class="mt-2 text-3xl font-black">{% if feedback_avg %}{{ feedback_avg|floatformat:1 }}{% else %}--{% endif %}</div></div>
+</section>
+{% endif %}
+
+<section class="mt-6 panel rounded-2xl p-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 class="text-lg font-black">{% if user.role == 'VIEWER' %}Public event browsing{% else %}Recent events{% endif %}</h2>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{% if user.role == 'VIEWER' %}Only approved public events appear here.{% else %}Quick scan of the latest operational activity.{% endif %}</p>
+    </div>
+    <a class="btn-soft text-sm" href="{% url 'events:event_list' %}">View all</a>
+  </div>
+  <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    {% for e in events %}
+      <a href="{% url 'events:event_detail' e.pk %}" class="lift block overflow-hidden rounded-2xl border border-slate-200 bg-white transition dark:border-slate-700 dark:bg-slate-900">
+        <div class="h-28 bg-slate-100 dark:bg-slate-800" style="background:linear-gradient(135deg,var(--accent-soft),rgba(255,255,255,.22)), url('https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=900&q=70'); background-size:cover; background-position:center;"></div>
+        <div class="p-4">
+          <div class="flex items-start justify-between gap-3">
+            <h3 class="font-black leading-snug">{{ e.title }}</h3>
+          </div>
+          <div class="mt-3 text-sm text-slate-500 dark:text-slate-400">{{ e.event_date }} | {{ e.get_event_type_display }} | {{ e.venue }}</div>
+        </div>
+      </a>
+    {% empty %}
+      <div class="rounded-2xl border border-dashed border-slate-300 p-8 text-sm text-slate-500 dark:border-slate-700">No events visible for your role.</div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_head %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const payload = {{ variance_rows_json|safe }};
+    const canvas = document.getElementById('budgetChart');
+    if (!canvas || !payload || payload.length === 0 || !window.Chart) return;
+    const labels = payload.map((r) => r.title.length > 22 ? `${r.title.slice(0, 22)}...` : r.title);
+    new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'College fund', data: payload.map((r) => Number(r.college_fund || 0)), backgroundColor: 'rgba(15,118,110,.65)', borderRadius: 8 },
+          { label: 'Sponsorship', data: payload.map((r) => Number(r.sponsorship || 0)), backgroundColor: 'rgba(79,70,229,.65)', borderRadius: 8 }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#334155' } } },
+        scales: {
+          x: { ticks: { color: '#64748b' }, grid: { display: false } },
+          y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(148,163,184,.18)' } }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - CSE-ICB{% endblock %}
+{% block content %}
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="lg:col-span-1">
+    <div class="sticky top-24">
+      <div class="text-sm font-bold uppercase tracking-[0.2em]" style="color:var(--accent)">Event workspace</div>
+      <h1 class="mt-2 text-3xl font-black tracking-tight">{{ title }}</h1>
+      <p class="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
+        Submit a clean event draft with venue, seats, funding, and description. Drafts stay pending until approval and approved budgets become locked.
+      </p>
+      <div class="mt-5 rounded-2xl p-4 text-sm font-semibold" style="background:var(--accent-soft); color:var(--accent-strong)">
+        {% if user.role == 'STUDENT_COORDINATOR' %}Coordinator-focused: keep details brief, accurate, and ready for faculty/admin review.
+        {% elif user.role == 'FACULTY' %}Faculty-focused: align event details with academic outcomes and departmental review.
+        {% else %}Admin-focused: create or refine events before publishing to viewers.{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <form method="post" class="panel rounded-2xl p-6 lg:col-span-2" novalidate>
+    {% csrf_token %}
+    <div class="grid gap-5 md:grid-cols-2">
+      {% for field in form %}
+        <div class="{% if field.name == 'description' or field.name == 'title' %}md:col-span-2{% endif %}">
+          <label class="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<div class="mt-1 text-xs text-slate-500">{{ field.help_text }}</div>{% endif %}
+          {% if field.errors %}<div class="mt-1 text-xs font-bold text-rose-600">{{ field.errors|striptags }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    <div class="mt-6 flex flex-wrap gap-3">
+      <button class="btn-primary inline-flex items-center gap-2" type="submit"><i data-lucide="save" class="h-4 w-4"></i>Save event</button>
+      <a class="btn-soft" href="{% url 'events:event_list' %}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

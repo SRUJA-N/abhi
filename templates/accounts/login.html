@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Login - CSE-ICB{% endblock %}
+{% block content %}
+<div class="grid min-h-[70vh] items-center gap-8 lg:grid-cols-2">
+  <section class="overflow-hidden rounded-2xl p-8 text-white shadow-soft" style="background:linear-gradient(135deg,rgba(37,99,235,.88),rgba(15,118,110,.86)), url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=72'); background-size:cover; background-position:center;">
+    <div class="max-w-xl">
+      <div class="text-sm font-bold uppercase tracking-[0.22em] text-white/75">CSE-ICB Event Management</div>
+      <h1 class="mt-4 text-4xl font-black tracking-tight md:text-5xl">A modern workspace for every event role.</h1>
+      <p class="mt-5 text-sm leading-7 text-white/82">Admins, faculty coordinators, student coordinators, and viewers each enter a focused interface with only the tools they need.</p>
+      <div class="mt-8 grid gap-3 text-sm sm:grid-cols-2">
+        <div class="rounded-xl bg-white/15 p-4 ring-1 ring-white/20">Approval workflows</div>
+        <div class="rounded-xl bg-white/15 p-4 ring-1 ring-white/20">Budget analytics</div>
+        <div class="rounded-xl bg-white/15 p-4 ring-1 ring-white/20">Media galleries</div>
+        <div class="rounded-xl bg-white/15 p-4 ring-1 ring-white/20">Registration tracking</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel mx-auto w-full max-w-md rounded-2xl p-8">
+    <h2 class="text-2xl font-black">Secure login</h2>
+    <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Use a seeded demo account on localhost.</p>
+    <div class="mt-5 grid gap-2 rounded-2xl bg-slate-50 p-4 text-xs font-semibold text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+      <div>admin_demo / demo12345</div>
+      <div>faculty_demo / demo12345</div>
+      <div>coordinator_demo / demo12345</div>
+      <div>viewer_demo / demo12345</div>
+    </div>
+    <form method="post" class="mt-6 space-y-4">
+      {% csrf_token %}
+      {% for field in form %}
+        <div>
+          {% if field.errors %}<div class="mb-1 text-xs font-bold text-rose-600">{{ field.errors|striptags }}</div>{% endif %}
+          {{ field }}
+        </div>
+      {% endfor %}
+      <button class="btn-primary flex w-full items-center justify-center gap-2" type="submit"><i data-lucide="log-in" class="h-4 w-4"></i>Enter workspace</button>
+    </form>
+  </section>
+</div>
+{% endblock %}
